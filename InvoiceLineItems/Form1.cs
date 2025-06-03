@@ -17,9 +17,10 @@ namespace InvoiceLineItems
             InitializeComponent();
         }
 
-        
 
-        private void Form1_Load(object sender, EventArgs e) {
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
             // store all line item + invoice entries in
             // list references
@@ -27,12 +28,13 @@ namespace InvoiceLineItems
             List<Invoice> invoices = InvoiceDB.GetInvoices();
 
             // join these into an IEnumerable before populating the ListView
-            var listViewItems = 
+            var listViewItems =
                 from item in lineItems
                 join invoice in invoices
                 on item.InvoiceID equals invoice.InvoiceID
                 orderby invoice.InvoiceDate
-                select new {
+                select new
+                {
                     item.InvoiceID,
                     invoice.InvoiceDate,
                     invoice.InvoiceTotal,
@@ -42,9 +44,14 @@ namespace InvoiceLineItems
                     item.ItemTotal
                 };
 
-                // fill the listview
-                foreach (var lineItem in listViewItems) {
-                lvwLineItems.Items.Add(new ListViewItem(new string[] {
+            int holdID = 0;
+
+            // fill the listview without repeating invoice data
+            foreach (var lineItem in listViewItems)
+            {
+                if (holdID != lineItem.InvoiceID)
+                {
+                    lvwLineItems.Items.Add(new ListViewItem(new string[] {
                     lineItem.InvoiceID.ToString(),
                     lineItem.InvoiceDate.ToShortDateString(),
                     lineItem.InvoiceTotal.ToString("c"),
@@ -53,6 +60,20 @@ namespace InvoiceLineItems
                     lineItem.Quantity.ToString(),
                     lineItem.ItemTotal.ToString("c")
                 }));
+                    holdID = lineItem.InvoiceID;
+                }
+                else
+                {
+                    lvwLineItems.Items.Add(new ListViewItem(new string[] {
+                    "",
+                    "",
+                    "",
+                    lineItem.ProductCode,
+                    lineItem.UnitPrice.ToString("c"),
+                    lineItem.Quantity.ToString(),
+                    lineItem.ItemTotal.ToString("c")
+                    }));
+                }
             }
         }
     }
